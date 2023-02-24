@@ -73,8 +73,9 @@ def annotation():
     print('path', request.path)
     print('url', request.url)
     print('args', request.args)
-    # gid: int = request.args.get('gid', 0, int)
-    gid = int(request.referrer[-1])
+    gid: int = request.args.get('gid', 0, int)
+    if gid == 0:
+        gid = int(request.referrer[-1])
     print('annotation', uid, gid)
     tid_list = dao.get_tid_list_by_gid_uid(uid, gid)
     last_tid: int = dao.get_last_tid_by_gid_uid(uid, gid)
