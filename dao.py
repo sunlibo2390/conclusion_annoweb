@@ -1,7 +1,7 @@
 # encoding:utf-8
 
 from hmac import new
-from typing import Any, Literal, Optional, Union, Dict, List, Tuple
+from typing import Any, Optional, Union, Dict, List, Tuple
 
 from pymongo.collection import Collection, Cursor
 from pymongo.database import Database
@@ -334,7 +334,7 @@ class DAO:
     def _query(self,
                col: str,
                filter: Dict[str, Any],
-               mode: Literal['one', 'all', 'count'],
+               mode,
                fields: Optional[List[str]] = None
                ):
         source: Collection = self._cols[col]  # 列名col对应数据列
