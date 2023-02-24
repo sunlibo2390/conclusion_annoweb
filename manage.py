@@ -26,29 +26,29 @@ app.config.from_mapping(
     SESSION_COOKIE_NAME='awt_cookie'
 )
 
-bootstrap: Bootstrap5 = Bootstrap5(app)
+bootstrap = Bootstrap5(app)
 
-login_manager: LoginManager = LoginManager(app)
+login_manager = LoginManager(app)
 login_manager.login_message = '请登录后操作！'
 login_manager.login_view = 'route.login'
 
 
 @login_manager.user_loader
-def load_user(uid: str) -> Optional[User]:
+def load_user(uid) -> Optional[User]:
     try:
         return User(int(uid))
     except ValueError:
         return None
 
 
-def run_server(dev: bool) -> None:
+def run_server(dev) -> None:
     from os import environ
     environ['FLASK_ENV'] = 'development'
     app.run(host='0.0.0.0', port=5000)
     # app.run(host='47.113.193.232', port=5000)
 
 
-parser: ArgumentParser = ArgumentParser(description='Launch the flask server.')
+parser = ArgumentParser(description='Launch the flask server.')
 parser.add_argument('-d', '--dev', action='store_true', help='enable development mode')
 
 
