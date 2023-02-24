@@ -1,3 +1,5 @@
+# encoding:utf-8
+
 from typing import Any, Dict, List, Tuple
 
 from flask.blueprints import Blueprint

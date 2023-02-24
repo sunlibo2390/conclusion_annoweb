@@ -1,3 +1,5 @@
+# encoding:utf-8
+
 from hmac import new
 from typing import Any, Literal, Optional, Union, Dict, List, Tuple
 

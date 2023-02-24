@@ -1,3 +1,5 @@
+# encoding:utf-8
+
 from flask_login.mixins import UserMixin
 from typing import Any, Dict, List, Tuple
 from dao import dao

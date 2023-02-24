@@ -1,3 +1,5 @@
+# encoding:utf-8
+
 from typing import Any, Optional, Dict, List
 
 from flask.globals import session

@@ -1,3 +1,5 @@
+# encoding:utf-8
+
 from typing import Union, Dict, List, Tuple
 from urllib.parse import ParseResult, urljoin, urlparse
 

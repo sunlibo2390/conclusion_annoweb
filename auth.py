@@ -1,3 +1,5 @@
+# encoding:utf-8
+
 from flask.blueprints import Blueprint
 from flask.globals import request
 from flask.json import jsonify

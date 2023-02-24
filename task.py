@@ -1,3 +1,5 @@
+# encoding:utf-8
+
 from json import loads
 from typing import Any, Optional, Dict
 

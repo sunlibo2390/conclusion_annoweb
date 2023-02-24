@@ -1,3 +1,5 @@
+# encoding:utf-8
+
 from argparse import ArgumentParser
 from typing import Optional
 
@@ -50,7 +52,6 @@ def run_server(dev) -> None:
 
 parser = ArgumentParser(description='Launch the flask server.')
 parser.add_argument('-d', '--dev', action='store_true', help='enable development mode')
-
 
 if __name__ == '__main__':
     run_server(parser.parse_args().dev)
