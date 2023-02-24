@@ -13,7 +13,7 @@ from route import bp_route
 from task import bp_task
 from user import User
 
-app: Flask = Flask(__name__)
+app = Flask(__name__)
 
 app.register_blueprint(bp_route)
 app.register_blueprint(bp_auth)
@@ -44,7 +44,7 @@ def load_user(uid: str) -> Optional[User]:
 def run_server(dev: bool) -> None:
     from os import environ
     environ['FLASK_ENV'] = 'development'
-    app.run(host='127.0.0.1', port=5000)
+    app.run(host='0.0.0.0', port=5000)
     # app.run(host='47.113.193.232', port=5000)
 
 
