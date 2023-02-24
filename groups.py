@@ -16,7 +16,7 @@ bp_groups: Blueprint = Blueprint('groups', __name__, url_prefix='/groups')
 
 @bp_groups.route('/load', methods=['POST'])
 @login_required
-def load() -> Response:
+def load():
     uid: int = current_user.uid
 
     tid_list1 = dao.get_tid_list_by_gid_uid(uid, 1)
@@ -41,7 +41,7 @@ def load() -> Response:
 
 @bp_groups.route('/update', methods=['POST'])
 @login_required
-def update() -> Response:
+def update():
     session['key'] = request.values.get('key', 0, type=int)
     session['order'] = request.values.get('order', 0, type=int)
     session['part'] = request.values.get('part', 0, type=int)

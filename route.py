@@ -19,13 +19,13 @@ bp_route: Blueprint = Blueprint('route', __name__)
 
 # 根路由
 @bp_route.route('/')
-def home() -> str:
+def home():
     return render_template('/index.html')
 
 
 # 登录路由
 @bp_route.route('/login')
-def login() -> Union[Response, str]:
+def login():
     for target in request.args.get('next', url_for('route.home'), str), request.referrer:
         # print('登录路由', target)
         if target:
@@ -42,7 +42,7 @@ def login() -> Union[Response, str]:
 # 登出路由
 @bp_route.route("/logout")
 @login_required
-def logout() -> Response:
+def logout():
     session.clear()
     logout_user()
     return redirect(url_for('route.home'))
@@ -51,7 +51,7 @@ def logout() -> Response:
 # 重置密码路由
 @bp_route.route("/reset")
 @login_required
-def reset() -> Response:
+def reset():
     target = request.args.get('next', url_for('route.groups'), str)
     return render_template('/reset.html', next_page=target)
 
@@ -59,14 +59,14 @@ def reset() -> Response:
 # 选择任务组
 @bp_route.route('/groups')
 @login_required
-def groups() -> str:
+def groups():
     return render_template('/groups.html')
 
 
 # 标注页面
 @bp_route.route('/annotation')
 @login_required
-def annotation() -> Union[Response, str]:
+def annotation():
     uid: int = current_user.uid
 
     print('referrer', request.referrer)
@@ -100,7 +100,7 @@ def annotation() -> Union[Response, str]:
 # 标注页面
 @bp_route.route('/arbitration')
 @login_required
-def arbitration() -> Union[Response, str]:
+def arbitration():
     uid: int = current_user.uid
     gid: int = request.args.get('gid', 0, int)
     print('route.arbitration', uid, gid)
@@ -127,7 +127,7 @@ def arbitration() -> Union[Response, str]:
 # 参考结果
 @bp_route.route('/compare')
 @login_required
-def compare() -> str:
+def compare():
     uid = 0
     gid = 1
 

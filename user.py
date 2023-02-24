@@ -6,7 +6,7 @@ from dao import dao
 
 
 class User(UserMixin):
-    def __init__(self, uid: int) -> None:
+    def __init__(self, uid: int):
         if not dao.has_user_uid(uid):
             raise ValueError(uid)
 
@@ -19,5 +19,5 @@ class User(UserMixin):
             uid, 'both' if self.ontest else 'formal'
         )}'''
 
-    def get_id(self) -> str:
+    def get_id(self):
         return str(self.uid)

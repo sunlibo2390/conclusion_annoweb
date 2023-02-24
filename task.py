@@ -17,7 +17,7 @@ bp_task: Blueprint = Blueprint('task', __name__, url_prefix='/task')
 
 @bp_task.route('/loadtask', methods=['POST'])
 @login_required
-def loadtask() -> Response:
+def loadtask():
     uid: int = request.values.get('uid', 0, type=int)
     tid: int = request.values.get('tid', 0, type=int)
 
@@ -52,7 +52,7 @@ def loadtask() -> Response:
 
 @bp_task.route('/loadanno', methods=['POST'])
 @login_required
-def loadanno() -> Response:
+def loadanno():
     gid: int = request.values.get('gid', 0, type=int)
     tid: int = request.values.get('tid', 0, type=int)
     return jsonify(load_anno(gid, tid, current_user.uid))
@@ -60,7 +60,7 @@ def loadanno() -> Response:
 
 @bp_task.route('/note', methods=['POST'])
 @login_required
-def note() -> Response:
+def note():
     gid: int = request.values.get('gid', 0, type=int)
     cid: int = request.values.get('cid', 0, type=int)
     roleset: int = request.values.get('roleset', -1, type=int)
@@ -78,7 +78,7 @@ def note() -> Response:
 
 @bp_task.route('/save', methods=['POST'])
 @login_required
-def save() -> Response:
+def save():
     uid: int = current_user.uid
     tid: int = request.values.get('tid', 0, type=int)
     gid: int = request.values.get('gid', 0, type=int)
@@ -117,7 +117,7 @@ def save() -> Response:
 
 @bp_task.route('/report', methods=['POST'])
 @login_required
-def report() -> Response:
+def report():
     gid: int = request.values.get('gid', 0, type=int)
     tid: int = request.values.get('tid', 0, type=int)
 

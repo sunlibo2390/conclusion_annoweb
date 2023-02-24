@@ -22,7 +22,7 @@ def singleton(cls):
 
 @singleton
 class DAO:
-    def __init__(self, host: str, username: str, password: str, database: str, authSource: str) -> None:
+    def __init__(self, host: str, username: str, password: str, database: str, authSource: str):
         self.__client: MongoClient = MongoClient(host=host, username=username,
                                                  password=password, authSource=authSource)
 
@@ -32,7 +32,7 @@ class DAO:
         ]}  # 数据库表名字典，表名:数据表
 
     # 验证用户密码
-    def validate_user(self, name: str, pwd: str) -> int:
+    def validate_user(self, name: str, pwd: str):
         user_query: Optional[Dict[str, Any]] = self._query(
             'user', {'name': name, 'active': True}, 'one', fields=['uid', 'password']
         )
@@ -61,10 +61,10 @@ class DAO:
             except:
                 return -1
 
-    def has_user_uid(self, uid: int) -> bool:
+    def has_user_uid(self, uid: int):
         return uid >= 0 and self._query('user', {'uid': uid, 'active': True}, 'one') is not None
 
-    def get_name_by_uid(self, uid: int) -> str:
+    def get_name_by_uid(self, uid: int):
         user_query: Optional[dict[str, str]] = self._query(
             'user', {'uid': uid, 'active': True}, 'one', fields=['name']
         )
@@ -72,7 +72,7 @@ class DAO:
         return '' if user_query is None else user_query['name']
 
     # 判断用户是否为仲裁
-    def is_user_adjudicator_by_uid(self, uid: int) -> bool:
+    def is_user_adjudicator_by_uid(self, uid: int):
         user_query: Optional[dict[str, str]] = self._query(
             'user', {'uid': uid, 'active': True}, 'one', fields=['adjudicator']
         )
@@ -112,7 +112,7 @@ class DAO:
             return 1  # 没有全部拒绝，但全都选择了
 
     # 获取用户最后标注的任务id
-    def get_last_tid_by_gid_uid(self, uid: int, gid: int) -> int:
+    def get_last_tid_by_gid_uid(self, uid: int, gid: int):
         query: Optional[dict[str, int]] = self._query('hist', {'uid': uid, 'gid': gid}, 'one',
                                                       fields=['tid'])
         # print(query)
@@ -128,7 +128,7 @@ class DAO:
         print('tid_list', tid_list)
         return tid_list
 
-    def get_task_list_by_gid_uid(self, uid: int, gid: int, adjudicator: bool = False) -> Dict[int, Tuple[str, int]]:
+    def get_task_list_by_gid_uid(self, uid: int, gid: int, adjudicator: bool = False):
         is_adjudicator: bool = self.is_user_adjudicator_by_uid(uid)
         print('get_task_list_by_gid_uid', uid, gid)
         user_data = self._query('user', {'uid': uid, 'active': True}, 'one')
@@ -210,7 +210,7 @@ class DAO:
 
             return task_list, all_aspect_list, []
 
-    def get_task_annotators_by_gid_cid(self, gid: int, tid: int) -> List[int]:
+    def get_task_annotators_by_gid_cid(self, gid: int, tid: int):
         task: Optional[dict[str, Any]] = self._query(
             'anno', {'gid': gid, 'tid': tid}, 'one', fields=['uid']
         )
@@ -245,7 +245,7 @@ class DAO:
                 finished_num += 1'''
         return finished_num
 
-    def set_last_tid_by_gid_uid(self, uid: int, gid: int, tid: int) -> None:
+    def set_last_tid_by_gid_uid(self, uid: int, gid: int, tid: int):
         try:
             self._update('hist', {'gid': gid, 'uid': uid}, {'tid': tid})
         except PyMongoError:
@@ -336,7 +336,7 @@ class DAO:
                filter: Dict[str, Any],
                mode: Literal['one', 'all', 'count'],
                fields: Optional[List[str]] = None
-               ) -> Union[None, Dict[str, Any], Cursor, int]:
+               ):
         source: Collection = self._cols[col]  # 列名col对应数据列
         if mode == 'count':
             return source.count(filter)  # 根据filter筛选并统计总数
@@ -352,16 +352,16 @@ class DAO:
             source.find_one if mode == 'one' else source.find
         )(filter, projection=projection)
 
-    def _aggregate(self, col: str, pipeline: List[Dict[str, Any]]) -> Cursor:
+    def _aggregate(self, col: str, pipeline: List[Dict[str, Any]]):
         return self._cols[col].aggregate(pipeline)
 
-    def _insert(self, col: str, doc: Dict[str, Any]) -> None:
+    def _insert(self, col: str, doc: Dict[str, Any]):
         self._cols[col].insert_one(doc)
 
-    def _update(self, col: str, filter: Dict[str, Any], doc: Dict[str, Any]) -> None:
+    def _update(self, col: str, filter: Dict[str, Any], doc: Dict[str, Any]):
         self._cols[col].update_one(filter, {'$set': doc}, upsert=True)
 
-    def _remove(self, col: str, filter: Dict[str, Any]) -> None:
+    def _remove(self, col: str, filter: Dict[str, Any]):
         self._cols[col].delete_one(filter)
 
 

@@ -7,11 +7,11 @@ from flask.globals import session
 from dao import dao
 
 
-def get_task_key(gid: int, cid: int, annotation: bool) -> str:
+def get_task_key(gid: int, cid: int, annotation: bool):
     return f'{gid}-{cid}-{"a" if annotation else "t"}'
 
 
-def update_cookie_pool(key: str, pool_key: str) -> None:
+def update_cookie_pool(key: str, pool_key: str):
     pool: List[str] = session.get(pool_key, [])
     if key in pool:
         pool.remove(key)
@@ -24,12 +24,12 @@ def update_cookie_pool(key: str, pool_key: str) -> None:
     session[pool_key] = pool
 
 
-def load_anno(gid: int, tid: int, uid: int) -> Dict[str, Any]:
+def load_anno(gid: int, tid: int, uid: int):
     anno_list, aspect_list = dao.get_anno_by_gid_tid_uid(gid, tid, uid)
     return {"anno_list": anno_list, "aspect_list": aspect_list}
 
 
-def load_anno_direct(gid: int, cid: int, uid: int) -> Dict[str, Any]:
+def load_anno_direct(gid: int, cid: int, uid: int):
     task: Dict[str, Any] = load_task(gid, cid)
     anno: Dict[str, Any] = dao.get_task_anno_by_gid_sid_pid_uid(gid, task['sid'], task['pid'],
                                                                 uid, force=True)

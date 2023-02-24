@@ -13,7 +13,7 @@ bp_auth: Blueprint = Blueprint('auth', __name__, url_prefix='/auth')
 
 
 @bp_auth.route('/auth', methods=['POST'])
-def auth() -> Response:
+def auth():
     username: str = request.values.get('username', '', type=str)
     password: str = request.values.get('password', '', type=str)
     uid: int = dao.validate_user(username, password)
@@ -26,7 +26,7 @@ def auth() -> Response:
 
 
 @bp_auth.route('/reset', methods=['POST'])
-def reset() -> Response:
+def reset():
     username: str = request.values.get('username', '', type=str)
     old_pwd: str = request.values.get('old_pwd', '', type=str)
     new_pwd: str = request.values.get('new_pwd', '', type=str)

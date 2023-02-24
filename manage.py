@@ -36,14 +36,14 @@ login_manager.login_view = 'route.login'
 
 
 @login_manager.user_loader
-def load_user(uid) -> Optional[User]:
+def load_user(uid):
     try:
         return User(int(uid))
     except ValueError:
         return None
 
 
-def run_server(dev) -> None:
+def run_server(dev):
     from os import environ
     environ['FLASK_ENV'] = 'development'
     app.run(host='0.0.0.0', port=5000)

@@ -14,7 +14,7 @@ bp_compare: Blueprint = Blueprint('compare', __name__, url_prefix='/compare')
 
 @bp_compare.route('/load', methods=['POST'])
 @login_required
-def load() -> Response:
+def load():
     uid: int = current_user.uid
     gold_group: List[int] = dao.get_user_group_list_by_uid(0, 'trial', True)
     user_group: List[int] = dao.get_user_group_list_by_uid(uid, 'trial', True)
