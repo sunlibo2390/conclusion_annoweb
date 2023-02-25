@@ -30,7 +30,7 @@ def loadtask():
         task['aspect'] = '，'.join(eval(task['aspects']))
         task['anno_list'], task['aspect_list'] = dao.get_anno_by_gid_tid_uid(1, tid, uid)
     elif gid == 2:
-        reviews = eval(task['reviews'])
+        reviews = task['reviews']
         task['text'] = ''
         for review in reviews:
             task['text'] += "<div>" + review + "</div><br>"
