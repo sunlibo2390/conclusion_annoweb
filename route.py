@@ -130,8 +130,10 @@ def arbitration():
 @login_required
 def compare():
     uid = 0
-    gid = 1
+    gid = 2
+    gid_list = [1 for i in range(10)] + [2 for j in range(10)]
 
+    # tid_list = [0, 120, 122, 140, 150, 176, 1339,1385]
     tid_list = dao.get_tid_list_by_gid_uid(uid, gid)
     last_tid: int = dao.get_last_tid_by_gid_uid(uid, gid)
 
@@ -148,6 +150,6 @@ def compare():
         tid_list=tid_list,
         last_tid=last_tid,
         uid=uid,
-        gid=gid,
+        gid_list=gid_list,
         tasks=task_list  # dict[int, tuple[tid:int, annotated:int]]
     )

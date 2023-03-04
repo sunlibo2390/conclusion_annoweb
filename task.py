@@ -22,16 +22,17 @@ def loadtask():
     tid: int = request.values.get('tid', 0, type=int)
 
     gid: int = request.values.get('gid', 0, type=int)
-    print(gid, tid)
+    # print(gid, tid)
     task: Dict[str, Any] = dao.get_task_by_gid_tid(gid, tid)
-    print('task/loadtask', task)
+    # print('task/loadtask', task)
     if gid == 1:
         task['text'] = task['review']
+        task['reviews'] = [task['review']]
         task['aspect'] = '，'.join(eval(task['aspects']))
         task['anno_list'], task['aspect_list'] = dao.get_anno_by_gid_tid_uid(1, tid, uid)
     elif gid == 2:
         reviews = task['reviews']
-        task['text'] = ''
+        task['text'] = ""
         for review in reviews:
             task['text'] += "<div>" + review + "</div><br>"
         task['anno_list'], task['aspect_list'] = dao.get_anno_by_gid_tid_uid(2, tid, uid)
@@ -40,12 +41,14 @@ def loadtask():
     dao.set_last_tid_by_gid_uid(uid, gid, tid)
 
     if current_user.adjudicator:
-        arbi_tasks, aspect_list, arbi_list = dao.get_annotated_task_by_gid_tid_uid(uid, gid, tid)
+        arbi_tasks, aspect_list, arbi_list, review_state = dao.get_annotated_task_by_gid_tid_uid(uid, gid, tid)
+        if len(review_state)>0:
+            task['review_state'] = review_state
         task['arbi_tasks'] = arbi_tasks
         task['anno_list'] = [arbi_task[0] for arbi_task in arbi_tasks]  # list[str]
         task['aspect_list'] = aspect_list  # list[int]
         task['arbi_list'] = arbi_list
-    print('task/loadtask', task)
+    # print('task/loadtask', task)
 
     return jsonify(task)
 
@@ -87,7 +90,7 @@ def save():
         anno_list = request.values.get('anno_list', None, type=str)
         anno_list = eval(anno_list)
         arbi_list = request.values.get('arbi_list', None, type=str)
-        print('arbi_list', arbi_list)
+        # print('arbi_list', arbi_list)
         arbi_list = eval(arbi_list)
         state_list = request.values.get('state_list', None, type=str)  # 仲裁任务各标注的状态：接收/拒绝/未选择
         state_list = eval(state_list)
@@ -95,22 +98,45 @@ def save():
         aspect_list = eval(aspect_list)
         aspect_list = ['/'.join(aspect) for aspect in aspect_list]  # 拼接
         aspect_list = list(set(aspect_list))  # 角度去重
-        dao.save_task_by_gid_tid_uid(uid, gid, tid, anno_list, aspect_list, state_list, arbi_list)
+        
+        if gid==1:
+            dao.save_task_by_gid_tid_uid(
+                uid, gid, tid, anno_list, aspect_list, state_list, arbi_list
+            )
+
+        elif gid==2:
+            review_state = request.values.get('review_state', None, type=str)
+            review_state = eval(review_state)  
+            dao.save_task_by_gid_tid_uid(
+                uid, gid, tid, anno_list, aspect_list, 
+                state_list, arbi_list, review_state = review_state
+            )
+        # dao.save_task_by_gid_tid_uid(uid, gid, tid, anno_list, aspect_list, state_list, arbi_list)
     else:
         anno_list: list[str] = request.values.get('anno_list', None, type=str)
         anno_list = eval(anno_list)
         anno_list = list(set(anno_list))  # 标注去重
         aspect_list: list[str] = request.values.get('aspect_list', None, type=str)
 
-        print("task/save", aspect_list)
+        # print("task/save", aspect_list)
 
         aspect_list = eval(aspect_list)
         aspect_list = ['/'.join(aspect) for aspect in aspect_list]  # 拼接
         aspect_list = list(set(aspect_list))  # 角度去重
 
-        print("task/save", aspect_list)
+        # print("task/save", aspect_list)
+        
+        if gid==1:
+            dao.save_task_by_gid_tid_uid(
+                uid, gid, tid, anno_list, aspect_list
+            )
 
-        dao.save_task_by_gid_tid_uid(uid, gid, tid, anno_list, aspect_list)
+        elif gid==2:
+            review_state = request.values.get('review_state', None, type=str)
+            review_state = eval(review_state)  
+            dao.save_task_by_gid_tid_uid(
+                uid, gid, tid, anno_list, aspect_list, review_state = review_state
+            )
 
     return jsonify({'success': True})
 

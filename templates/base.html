@@ -56,7 +56,32 @@
             margin-right: 25px;
             max-width: 200px;
         }
+        .completed {
+            color: grey;
+            text-decoration: line-through;
+        }
 
+        /* 隐藏默认的复选框 */
+        input[type="checkbox"] {
+            position: absolute;
+            zoom : 180%;
+            opacity: 0;
+        }
+
+        /* 自定义复选框图标 */
+        input[type="checkbox"] + span::before {
+            content: "✓";
+            display: inline-block;
+            margin-right: 0.5em;
+            font-size: 1.2em;
+            color: green;
+        }
+
+        /* 自定义已选中的复选框图标 */
+        input[type="checkbox"]:checked + span::before {
+            content: "✗";
+            color: red;
+        }
     </style>
     {% block headfoot %}{% endblock %}
 </head>

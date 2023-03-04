@@ -157,8 +157,13 @@ class DAO:
         elif gid == 2:
             task = self._query(
                 'task2', {'tid': tid}, 'one',
-                fields=['tid', 'reviews', 'aspect', 'object']
+                fields=['tid', 'reviews', 'aspect', 'object', 'review_state']
             )
+            try:
+                review_state = task['review_state']
+                return task
+            except:
+                task['review_state'] = [1 for review in task['reviews']]
         return task
 
     def get_anno_by_gid_tid_uid(self, gid, tid, uid):
@@ -179,18 +184,22 @@ class DAO:
         # print(uid, gid, tid)
         arbi_tasks = self._query(
             'arbi', {'uid': uid, 'gid': gid, 'tid': tid},
-            'one', fields=['anno_list', 'state_list', 'aspect_list', 'arbi_list'])
+            'one', fields=['anno_list', 'state_list', 'aspect_list', 'arbi_list', 'review_state'])
         if arbi_tasks is not None:
             # 若被仲裁过
             anno_list = arbi_tasks['anno_list']
             state_list = arbi_tasks['state_list']
             anno_num = len(anno_list)
             aspect_list = [aspect.split('/') for aspect in arbi_tasks['aspect_list']]
+            if gid==2:
+                review_state = arbi_tasks['review_state']
+            else:
+                review_state = []
             try:
                 arbi_list = arbi_tasks['arbi_list']
             except:
                 arbi_list = []
-            return [(anno_list[i], state_list[i]) for i in range(anno_num)], aspect_list, arbi_list
+            return [(anno_list[i], state_list[i]) for i in range(anno_num)], aspect_list, arbi_list, review_state
         else:
             # 若没有被仲裁过
             annotated_tasks = self._query(
@@ -208,7 +217,7 @@ class DAO:
             all_aspect_list = list(set(all_aspect_list))
             all_aspect_list = [aspect.split('/') for aspect in all_aspect_list]  # list[list[str]]
 
-            return task_list, all_aspect_list, []
+            return task_list, all_aspect_list, [], []
 
     def get_task_annotators_by_gid_cid(self, gid: int, tid: int):
         task: Optional[dict[str, Any]] = self._query(
@@ -252,7 +261,7 @@ class DAO:
             pass
 
     def save_task_by_gid_tid_uid(self, uid: int, gid: int, tid: int, anno_list: List[str], aspect_list: List[str],
-                                 anno_state_list: List[int] = None, arbi_list: List[str] = None):
+                                 anno_state_list: List[int] = None, arbi_list: List[str] = None, review_state: List[int] = None):
         try:
             if anno_state_list is not None:
                 # 仲裁环节
@@ -265,6 +274,7 @@ class DAO:
                         'gid': gid, 'tid': tid, 'uid': uid,
                         'anno_list': anno_list, 'aspect_list': aspect_list,
                         'state_list': anno_state_list, 'arbi_list': arbi_list,
+                        'review_state':review_state, 
                         'adjudicated': self.is_arbitrated_by_list(aspect_list, anno_state_list, arbi_list)
                     }
                 )
@@ -290,11 +300,14 @@ class DAO:
                 # 标注环节
                 # 清空该用户对该任务的原有标注
                 self._remove('anno', {'gid': gid, 'tid': tid, 'uid': uid})
-                print("insert start")
+                print("insert start", 'gid:%d'%gid, 'tid%d'%tid)
                 self._insert('anno',
                              {'gid': gid, 'tid': tid, 'uid': uid, 'anno_list': anno_list, 'aspect_list': aspect_list,
                               'state': -1})
                 print("insert end")
+
+                if gid==2 and review_state is not None:
+                    self._update('task2', {'tid':tid}, {'review_state':review_state})
 
         except PyMongoError:
             pass

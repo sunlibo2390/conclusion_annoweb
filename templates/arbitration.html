@@ -59,12 +59,21 @@
                     </div>
 
                 </div>
-                <div class="lead" id="aspect">aspects</div><br>
-                <div style="text-indent:2em;" >
+                <div class="lead" id="aspect">aspects</div>
+                <br>
+                <div>
+                    {% if gid == 2 %}
+                    <div class="lead"><b>任务一：</b>选择是否修改冲突句子</div>
+                    {% endif %}
                     <div class="text" style="font-family:宋体" id="sentence">The quick brown fox jumps over a lazy dog.</div>
                 </div>
             </div>
-
+            {% if gid == 1 %}
+            <div class="lead"><b>任务一：</b>选择是否修改细粒度角度</div>
+            {% else%}
+            <div class="lead"><b>任务二：</b>选择是否修改细粒度角度</div>
+            {% endif %}
+            <br>
             <div id="select_list">
                 <div>
                     <div style="display:flex;align-items:center;" >
@@ -97,17 +106,22 @@
                     </div>
                 </div>
             </div>
-
             <br>
-
+            {%if gid == 1 %}
+            <div class="lead"><b>任务二：</b>判断是否接受归纳结果</div><br>
+            {% else %}
+            <div class="lead"><b>任务三：</b>判断是否接受归纳结果</div><br>
+            {% endif %}
             <div id="annotated-list" class="input-group">
 
             </div>
             <div id="new-annotation" style="display:none">
                 <br>
-                <div class="lead">
-                    请输入修正后结果：
-                </div>
+                {%if gid == 1 %}
+                <div class="lead"><b>任务三：</b>输入修正后结果</div>
+                {% else %}
+                <div class="lead"><b>任务四：</b>输入修正后结果</div>
+                {% endif %}
                 <br>
                 <div id="input-list" class="input-group">
                     <div class="input-container" id="input_container_1">
@@ -255,6 +269,22 @@
             if(level_list[0].value.length > 0){
                 aspect_list.push([level_list[0].value, level_list[1].value, level_list[2].value])
             }
+        }
+
+        // 保存每个句子是否被删除
+        if (gid==2) {
+            let review_state = [];
+
+            let sentence_div = document.getElementById("sentence")
+            let checkbox_list = sentence_div.querySelectorAll("input")
+            for(let k=0;k<checkbox_list.length;k++){
+                if (checkbox_list[k].checked) {
+                    review_state.push(0)
+                }else{
+                    review_state.push(1)
+                }
+            }
+            form.append("review_state", JSON.stringify(review_state));
         }
 
         form.append("anno_list", JSON.stringify(anno_list));
@@ -416,7 +446,36 @@
         document.getElementById("counter").innerText = (tidIndex + 1) + "/" + tidList.length
         document.getElementById("object").innerText = data["object"]
         document.getElementById("aspect").innerHTML = "以下评论包括角度<b>" + highlight(data["aspect"]) + "</b>，请将其归纳为一句话（不超过50字）"
-        document.getElementById("sentence").innerHTML = highlight(data["text"])
+
+        if(data['reviews'].length>1){
+            let reviews_innerHTML = ""
+            for(i=0;i<data['reviews'].length;i++){
+                reviews_innerHTML += "<br><div style='font-family:宋体'>"
+                if(data['review_state'][i]==1){
+                    reviews_innerHTML += "<input type='checkbox' onclick='completeTask(this)'>"
+                    reviews_innerHTML += "<span>" + highlight(data['reviews'][i]) + "</span>"
+                }else if(data['review_state'][i]==0){
+                    reviews_innerHTML += "<input type='checkbox' onclick='completeTask(this)' checked>"
+                    reviews_innerHTML += "<span class='completed'>" + highlight(data['reviews'][i]) + "</span>"
+                }
+                
+                reviews_innerHTML += "</div>"
+            }
+            document.getElementById("sentence").innerHTML = reviews_innerHTML
+        }else{
+            document.getElementById("sentence").innerHTML = "<div style='text-indent:2em;'>" + highlight(data["text"]) + "</div>"
+        }
+    }
+    function completeTask(checkbox) {
+        // 获取复选框和文本元素
+        const text = checkbox.nextElementSibling;
+
+        // 如果复选框已选中，则添加“completed”类，否则删除该类
+        if (checkbox.checked) {
+            text.classList.add('completed');
+        } else {
+            text.classList.remove('completed');
+        }
     }
     // 高亮处理
     function highlight(string){

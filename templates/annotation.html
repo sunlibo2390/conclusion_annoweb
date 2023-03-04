@@ -97,12 +97,19 @@
 
                 </div>
                 <div class="lead" id="aspect">aspects</div><br>
-                <div style="text-indent:2em;" >
-                    <div class="text" style="font-family:宋体" id="sentence">The quick brown fox jumps over a lazy dog.</div>
+                <div>
+                    {% if gid == 2 %}
+                    <div class='lead'><b>任务一：</b>删除完全矛盾的句子</div>
+                    {% endif %}
+                    <div id="sentence" class='text'>The quick brown fox jumps over a lazy dog.
+                    </div>
                 </div>
             </div>
-            <div class="lead">请选择上述评论所含具体角度:</div><br>
-
+            {%if gid == 1 %}
+            <div class="lead"><b>任务一：</b>选择上述评论所含具体角度</div><br>
+            {% else %}
+            <div class="lead"><b>任务二：</b>选择上述评论所含具体角度</div><br>
+            {% endif %}
             <div id="select_list">
                 <div>
                     <div style="display:flex;align-items:center;" >
@@ -137,7 +144,11 @@
             </div>
 
             <br>
-            <div class="lead">请将上述评论归纳为一句话（不超过50字）:</div><br>
+            {%if gid == 1 %}
+            <div class="lead"><b>任务二：</b>将上述评论归纳为一句话（不超过50字）</div><br>
+            {% else %}
+            <div class="lead"><b>任务三：</b>将上述评论归纳为一句话（不超过50字）</div><br>
+            {% endif %}
             <div id="input_list" class="input-group">
                 <div class="input-container" id="input_container_1">
                     <span class="lead" style="vertical-align:top;min-width:70px;">归纳1：</span>
@@ -280,23 +291,36 @@
             }
         }
 
+        // 保存每个句子是否被删除
+        if (gid==2) {
+            let review_state = [];
+
+            let sentence_div = document.getElementById("sentence")
+            let checkbox_list = sentence_div.querySelectorAll("input")
+            for(let k=0;k<checkbox_list.length;k++){
+                if (checkbox_list[k].checked) {
+                    review_state.push(0)
+                }else{
+                    review_state.push(1)
+                }
+            }
+            form.append("review_state", JSON.stringify(review_state));
+        }
+        
         form.append("anno_list", JSON.stringify(anno_list));
         form.append("aspect_list", JSON.stringify(aspect_list));
 
-        if (anno_list.length>0 || aspect_list.length>0){
-            applyAjax("{{ url_for('task.save') }}", form, status => {
-                if (!status["success"]) toast("保存任务 " + (tidIndex + 1) + " 失败：" + xhr.status + " " + xhr.statusText, "danger")
-                if (status["success"] && reportSuccess){
-                    toast("保存任务成功！", "success")
-                }
-                change_state(anno_list, aspect_list)
-                if (action) action()
-                else reloadAnnotation(anno_list, aspect_list)
-            }, (e, xhr) => toast("保存任务 " + (tidIndex + 1) + " 失败：" + xhr.status + " " + xhr.statusText, "danger"))
-        }else{
+
+        applyAjax("{{ url_for('task.save') }}", form, status => {
+            if (!status["success"]) toast("保存任务 " + (tidIndex + 1) + " 失败：" + xhr.status + " " + xhr.statusText, "danger")
+            if (status["success"] && reportSuccess){
+                toast("保存任务成功！", "success")
+            }
+            change_state(anno_list, aspect_list)
             if (action) action()
             else reloadAnnotation(anno_list, aspect_list)
-        }
+        }, (e, xhr) => toast("保存任务 " + (tidIndex + 1) + " 失败：" + xhr.status + " " + xhr.statusText, "danger"))
+
     }
 
     function reloadAnnotation(anno_list, aspect_list) {
@@ -428,7 +452,50 @@
         document.getElementById("counter").innerText = (tidIndex + 1) + "/" + tidList.length
         document.getElementById("object").innerText = data["object"]
         document.getElementById("aspect").innerHTML = "以下评论包括角度<b>" + highlight(data["aspect"]) + "</b>"
-        document.getElementById("sentence").innerHTML = highlight(data["text"])
+        
+        if(data['reviews'].length>1){
+            let reviews_innerHTML = ""
+            for(i=0;i<data['reviews'].length;i++){
+                reviews_innerHTML += "<br><div style='font-family:宋体'>"
+                if(data['review_state'][i]==1){
+                    reviews_innerHTML += "<input type='checkbox' onclick='completeTask(this)'>"
+                    reviews_innerHTML += "<span>" + highlight(data['reviews'][i]) + "</span>"
+                }else if(data['review_state'][i]==0){
+                    reviews_innerHTML += "<input type='checkbox' onclick='completeTask(this)' checked>"
+                    reviews_innerHTML += "<span class='completed'>" + highlight(data['reviews'][i]) + "</span>"
+                }
+                
+                reviews_innerHTML += "</div>"
+            }
+            document.getElementById("sentence").innerHTML = reviews_innerHTML
+            
+            // 修改句子状态
+            /*let text_list = document.getElementById("sentence").querySelectorAll("span")
+            let text_list = document.getElementById("sentence").querySelectorAll("span")
+            for(j=0;j<data['review_state'].length;j++){
+                if (data['review_state'][j]==0) {
+                    text_list[j].classList.add('completed');
+                }
+            }*/
+
+
+        }else{
+            document.getElementById("sentence").innerHTML = "<div style='text-indent:2em;'>" + highlight(data["text"]) + "</div>"
+        }
+        
+        
+        // document.getElementById("sentence").innerHTML = highlight(data["text"])
+    }
+    function completeTask(checkbox) {
+        // 获取复选框和文本元素
+        const text = checkbox.nextElementSibling;
+
+        // 如果复选框已选中，则添加“completed”类，否则删除该类
+        if (checkbox.checked) {
+            text.classList.add('completed');
+        } else {
+            text.classList.remove('completed');
+        }
     }
     // 高亮处理
     function highlight(string){
@@ -524,7 +591,7 @@
             '安全性能': ["安全气囊、安全带", "盲区监测系统、倒车影像", "自动泊车、自适应巡航", "其他"],
             '内部设施': ["空调、音响系统", "导航、多媒体系统", "座椅、储物空间", "其他"],
             '外观设计': ["车身线条、造型风格", "前脸、车灯、轮毂", "其他"],
-            '品牌声誉': ["历史沿革、品牌影响力", "售后服务、维修保养", "品牌认知度、口碑", "其他"],
+            '品牌声誉': ["品牌影响力", "售后服务、维修保养", "品牌认知度、口碑", "其他"],
         },
         '化妆品': {
             '化妆品分类': ["护肤品", "彩妆品", "美发用品", "身体护理品", "其他"],
@@ -536,14 +603,13 @@
                 "身体护理品：香皂、沐浴露、润肤霜、除臭剂",
                 "其他"
             ],
-            '成分特点': ["天然成分、有机成分", "化学成分、合成成分", "其他"],
+            '成分特点': ["吸收性", "天然成分、有机成分", "气味", "其他"],
             '使用方法': ["涂抹", "喷洒", "擦拭", "按摩", "其他"],
-            '质地': ["液态", "膏状", "粉状", "凝胶状", "其他"],
-            '包装': ["盒装", "瓶装", "管装", "便携式", "家庭装", "其他"],
-            '品牌特点': ["品牌知名度、口碑", "品牌定位、价位", "其他"],
+            '包装&质量': ["份量、尺寸", "外观", "方便、便携性", "包装是否损坏", "其他"],
+            '品牌&价格': ["品牌知名度、口碑", "价格", "性价比", "其他"],
         },
         '笔记本电脑': {
-            "电脑品牌": ["苹果", "联想", "戴尔", "惠普", "华为", "其他"],
+            "品牌&价格": ["品牌知名度、口碑", "价格", "性价比", "其他"],
             "电脑型号": ["超极本", "游戏本", "商务本", "轻薄本", "其他"],
             "电脑配置": ["处理器", "内存", "硬盘", "显卡", "其他"],
             "屏幕特点": ["尺寸", "分辨率", "色彩表现", "其他"],
@@ -554,15 +620,14 @@
             "网络特点": ["无线网络", "蓝牙", "4G", "蜂窝网络", "其他"],
         },
         '餐厅': {
-            "餐厅类型": ["西餐厅", "中餐厅", "日本料理", "韩国料理", "东南亚菜", "快餐", "俄餐", "其他"],
-            "餐厅环境": ["装修风格", "音乐氛围", "灯光布局", "桌椅设计", "带有露台、私人包厢、观景位", "其他"],
-            "餐厅位置": ["市中心", "商业区", "居民区", "景区", "其他"],
-            "菜品特色": ["特色菜", "地方菜", "创意菜", "主打菜", "其他"],
-            "食材质量": ["新鲜度", "营养价值", "产地", "其他"],
-            "菜品口感": ["酸甜苦辣咸", "油腻度", "口感细腻或粗糙", "咀嚼度", "其他"],
-            "服务质量": ["服务态度、服务速度、服务技能", "特色服务、服务项目", "其他"],
-            "价格水平": ["餐厅档次", "地段", "口味", "服务", "其他"],
-            "卫生程度": ["餐具清洁", "环境卫生", "其他"],
+            "餐厅类型": ["中餐厅", "外国餐厅", "快餐", "甜品店", "咖啡厅、酒吧", "其他"],
+            "餐厅环境": ["装修风格", "音乐氛围", "灯光布局", "桌椅设计", "温度", "带有露台、私人包厢、观景位", "其他"],
+            "餐厅位置": ["市中心", "商业区", "居民区", "景区", "客流量", "其他"],
+            "食材&外观": ["新鲜度", "菜品外观", "份量", "其他"],
+            "菜品口感": ["酸甜苦辣咸", "油腻度、爽口度", "口感细腻或粗糙", "咀嚼度", "其他"],
+            "服务&排队": ["服务态度、服务速度、服务技能", "特色服务、服务项目", "排队时间", "其他"],
+            "价格水平": ["餐厅档次", "地段", "口味", "服务", "优惠活动", "性价比", "其他"],
+            "卫生程度": ["餐具清洁", "环境卫生", "气味", "其他"],
         },
     }
 
