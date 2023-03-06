@@ -61,8 +61,8 @@
                     </div>
 
                 </div>
-                <div class="lead" id="aspect">aspects</div><br>
-                <div style="text-indent:2em;" >
+                <div class="lead" id="aspect">aspects</div>
+                <div>
                     <div class="text" style="font-family:宋体" id="sentence">The quick brown fox jumps over a lazy dog.</div>
                 </div>
             </div>
@@ -98,7 +98,12 @@
     tidList.push(Number("{{tid }}"))
     {% endfor %}
 
-    let gid = "{{ gid }}"
+    let gidList = []
+    {% for gid in gid_list %}
+    gidList.push(Number("{{gid }}"))
+    {% endfor %}
+
+    // let gid = "{{ gid }}"
     let uid = "{{ uid }}"
 
     load(tidList.findIndex(x => x == Number("{{ last_tid }}")))
@@ -109,7 +114,7 @@
 
         if (nextTidIndex !== tidIndex) {
             let form = new FormData()
-            form.append("gid", gid)
+            form.append("gid", gidList[nextTidIndex])
             form.append("uid", uid)
             form.append("tid", tidList[nextTidIndex])
 
@@ -148,13 +153,13 @@
 
     function reloadAnnotation(anno_list) {
         // 修正输入框个数
-        if(anno_list.length > 0){
+        if(anno_list.length > input_num){
             need_num = anno_list.length-input_num
             for (let i=0;i<need_num;i++){
                 add_input();
             }
         }else{
-            no_need_num = input_num;
+            no_need_num = input_num-anno_list.length;
             for (let i=0;i<no_need_num;i++){
                 del_input();
             }
@@ -183,7 +188,25 @@
         document.getElementById("counter").innerText = (tidIndex + 1) + "/" + tidList.length
         document.getElementById("object").innerText = data["object"]
         document.getElementById("aspect").innerHTML = "以下评论包括角度<b>" + highlight(data["aspect"]) + "</b>，请将其归纳为一句话（不超过50字）"
-        document.getElementById("sentence").innerHTML = highlight(data["text"])
+
+        if(data['reviews'].length>1){
+            let reviews_innerHTML = ""
+            for(i=0;i<data['reviews'].length;i++){
+                reviews_innerHTML += "<br><div style='font-family:宋体'>"
+                if(data['review_state'][i]==1){
+                    reviews_innerHTML += "<input type='checkbox' onclick='completeTask(this)' disabled>"
+                    reviews_innerHTML += "<span>" + highlight(data['reviews'][i]) + "</span>"
+                }else if(data['review_state'][i]==0){
+                    reviews_innerHTML += "<input type='checkbox' onclick='completeTask(this)' checked disabled>"
+                    reviews_innerHTML += "<span class='completed'>" + highlight(data['reviews'][i]) + "</span>"
+                }
+                
+                reviews_innerHTML += "</div>"
+            }
+            document.getElementById("sentence").innerHTML = reviews_innerHTML
+        }else{
+            document.getElementById("sentence").innerHTML = "<br><div style='text-indent:2em;'>" + highlight(data["text"]) + "</div>"
+        }
     }
     // 高亮处理
     function highlight(string){

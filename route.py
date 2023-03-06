@@ -130,17 +130,22 @@ def arbitration():
 @login_required
 def compare():
     uid = 0
-    gid = 2
-    gid_list = [1 for i in range(10)] + [2 for j in range(10)]
+    # gid_list = [1 for i in range(10)] + [2 for j in range(10)]
+    # gid_list = [1 for i in range(7)] + [2 for j in range(8)]
 
-    # tid_list = [0, 120, 122, 140, 150, 176, 1339,1385]
-    tid_list = dao.get_tid_list_by_gid_uid(uid, gid)
-    last_tid: int = dao.get_last_tid_by_gid_uid(uid, gid)
+    # tid_list = [0, 120, 122, 150, 192, 1006, 1121] + [6, 397, 484, 871, 957, 1885, 1894, 1935]
+    task1_tid_list = dao.get_tid_list_by_gid_uid(uid, 1)
+    task2_tid_list = dao.get_tid_list_by_gid_uid(uid, 2)
+    tid_list = task1_tid_list + task2_tid_list
+    gid_list = [1 for i in task1_tid_list] + [2 for j in task2_tid_list]
 
-    if last_tid not in tid_list:
-        last_tid = tid_list[0]
+    # last_tid: int = dao.get_last_tid_by_gid_uid(uid, gid)
+    last_tid: int = tid_list[0]
 
-    task_list: Dict[int, Tuple[str, str, int]] = dao.get_task_list_by_gid_uid(uid, gid)
+    task1_list: Dict[int, Tuple[str, int]] = dao.get_task_list_by_gid_uid(uid, 1)
+    task2_list: Dict[int, Tuple[str, int]] = dao.get_task_list_by_gid_uid(uid, 2)
+    task_list = dict(task1_list)
+    task_list.update(task2_list)
 
     if len(task_list) == 0:
         return redirect(url_for('route.groups'))

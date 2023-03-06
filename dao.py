@@ -231,6 +231,12 @@ class DAO:
                                       fields=["anno_list", "aspect_list"])
         finished_num = 0
         for task in annotated_tasks:
+            '''print(
+                'dao/count__annotated',
+                finished_num,
+                task['anno_list'],
+                len(task['anno_list'])
+            )'''
             if len(task['anno_list']) > 0 and len(task['aspect_list']) > 0:
                 finished_num += 1
         return finished_num
@@ -299,7 +305,9 @@ class DAO:
             else:
                 # 标注环节
                 # 清空该用户对该任务的原有标注
-                self._remove('anno', {'gid': gid, 'tid': tid, 'uid': uid})
+                annos = self._query('anno', {'gid': gid, 'tid': tid, 'uid': uid}, 'all')
+                for anno in annos:
+                    self._remove('anno', {'gid': gid, 'tid': tid, 'uid': uid})
                 print("insert start", 'gid:%d'%gid, 'tid%d'%tid)
                 self._insert('anno',
                              {'gid': gid, 'tid': tid, 'uid': uid, 'anno_list': anno_list, 'aspect_list': aspect_list,
