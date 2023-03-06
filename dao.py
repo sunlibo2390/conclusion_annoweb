@@ -85,6 +85,8 @@ class DAO:
         if result is not None:
             if len(result['anno_list']) > 0 and len(result['aspect_list']) > 0:
                 return 1
+            elif len(result['anno_list']) == 0 and len(result['aspect_list']) == 0:
+                return -1
             else:
                 return -2
         else:
